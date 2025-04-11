@@ -43,5 +43,5 @@ Follow these steps to run the project on your local machine:
 git clone https://github.com/neha111tw/E-commerce-product-page.git
 cd E-commerce-product-page
 1- npm install
-2- npm run start
+2- npm start
 3- npm run build
