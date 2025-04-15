@@ -1,38 +1,46 @@
-import { useState } from 'react';
-import { CartProvider } from './context/CartContext';
-import useProducts from './hooks/useProducts';
-import Navbar from './components/Navbar';
-import ProductCard from './components/ProductCard';
-import FilterSection from './components/FilterSection';
-import SortDropdown from './components/SortDropdown';
-import Pagination from './components/Pagination';
-import MiniCart from './components/MiniCart';
-import LoadingSkeleton from './components/LoadingSkeleton';
-import Footer from './components/Footer';
-import './styles/App.css';
+import { useState } from "react";
+import { CartProvider } from "./context/CartContext";
+import useProducts from "./hooks/useProducts";
+import Navbar from "./components/Navbar";
+import ProductCard from "./components/ProductCard";
+import FilterSection from "./components/FilterSection";
+import SortDropdown from "./components/SortDropdown";
+import Pagination from "./components/Pagination";
+import MiniCart from "./components/MiniCart";
+import LoadingSkeleton from "./components/LoadingSkeleton";
+import Footer from "./components/Footer";
+import "./styles/App.css";
+import { Input } from "@mui/material";
+import { Search } from "@mui/icons-material";
 
 const ITEMS_PER_PAGE = 8;
 
 function App() {
   const { products, loading, error } = useProducts();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortOption, setSortOption] = useState('default');
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortOption, setSortOption] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchItem, setSearchItem] = useState("");
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(product => product.category === selectedCategory);
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      selectedCategory === "all" || product.category === selectedCategory;
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchItem.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortOption) {
-      case 'price-low':
+      case "price-low":
         return a.price - b.price;
-      case 'price-high':
+      case "price-high":
         return b.price - a.price;
-      case 'title-asc':
+      case "title-asc":
         return a.title.localeCompare(b.title);
-      case 'title-desc':
+      case "title-desc":
         return b.title.localeCompare(a.title);
       default:
         return 0;
@@ -45,45 +53,53 @@ function App() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  if (error) return <div className="error">Error loading products: {error}</div>;
+  if (error)
+    return <div className="error">Error loading products: {error}</div>;
 
   return (
     <CartProvider>
       <div className="app">
         <Navbar onCartClick={() => setIsCartOpen(true)} />
-        
+
         <main className="main-content">
           <div className="controls">
-            <FilterSection 
+            <FilterSection
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
             />
-            <SortDropdown 
+            <SortDropdown
               sortOption={sortOption}
               onSortChange={setSortOption}
             />
           </div>
-
+          <div>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchItem}
+              onChange={(e) => setSearchItem(e.target.value)}
+            />
+          </div>
           <div className="product-grid">
             {loading ? (
               <LoadingSkeleton count={ITEMS_PER_PAGE} />
             ) : (
-              paginatedProducts.map(product => (
+              paginatedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))
             )}
           </div>
 
           {!loading && totalPages > 1 && (
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
           )}
         </main>
-        
-        <Footer/>
+
+        <Footer />
 
         <MiniCart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       </div>
