@@ -73,7 +73,7 @@ function App() {
             />
           </div>
           <div>
-            <input
+            <Input
               type="text"
               placeholder="Search..."
               value={searchItem}
